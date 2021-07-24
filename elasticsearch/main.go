@@ -1,6 +1,7 @@
 package elasticsearch
 
 import (
+	"errors"
 	"log"
 
 	es "github.com/elastic/go-elasticsearch/v7"
@@ -10,15 +11,18 @@ import (
 	Hey!, combining interface with struct to make client field of elasticsearch struct private 🤙
 */
 
+var client Elasticsearch
+
 type Elasticsearch interface {
 	Info() (interface{}, error)
+	Store()
 }
 
 type elasticsearch struct {
 	client *es.Client
 }
 
-func New(addresses []string) Elasticsearch {
+func New(addresses []string, shouldStore bool) Elasticsearch {
 
 	cfg := es.Config{
 		Addresses: addresses,
@@ -32,7 +36,12 @@ func New(addresses []string) Elasticsearch {
 		return nil
 	}
 
-	return &elasticsearch{client: esClient}
+	elasticsearchObj := &elasticsearch{client: esClient}
+
+	if shouldStore {
+		client = elasticsearchObj
+	}
+	return elasticsearchObj
 }
 
 func (elasticsearchObj *elasticsearch) Info() (interface{}, error) {
@@ -44,4 +53,16 @@ func (elasticsearchObj *elasticsearch) Info() (interface{}, error) {
 	}
 
 	return res, nil
+}
+
+func (elasticsearchObj *elasticsearch) Store() {
+	client = elasticsearchObj
+}
+
+func GetClient() (Elasticsearch, error) {
+	if client == nil {
+		return nil, errors.New("there are no stored client yet")
+	}
+
+	return client, nil
 }

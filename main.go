@@ -22,7 +22,7 @@ func main() {
 
 	addresses := []string{elasticsearchURL}
 
-	es := elasticsearch.New(addresses)
+	es := elasticsearch.New(addresses, true)
 
 	info, err := es.Info()
 
@@ -32,5 +32,4 @@ func main() {
 	}
 
 	log.Println(info)
-
 }
