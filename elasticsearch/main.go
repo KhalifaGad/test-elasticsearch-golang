@@ -1,52 +1,47 @@
 package elasticsearch
 
 import (
-	"errors"
 	"log"
 
 	es "github.com/elastic/go-elasticsearch/v7"
 )
 
-var client *es.Client
+/*
+	Hey!, combining interface with struct to make client field of elasticsearch struct private 🤙
+*/
 
-func Init(addresses []string) bool {
+type Elasticsearch interface {
+	Info() (interface{}, error)
+}
+
+type elasticsearch struct {
+	client *es.Client
+}
+
+func New(addresses []string) Elasticsearch {
+
 	cfg := es.Config{
 		Addresses: addresses,
 	}
+
 	log.Print("creating es client...")
 	esClient, err := es.NewClient(cfg)
 
-	client = esClient
-
 	if err != nil {
 		log.Fatalf("Error creating elasticsearch client: %v", err)
-		return false
+		return nil
 	}
 
-	return true
+	return &elasticsearch{client: esClient}
 }
 
-func Info() (interface{}, error) {
+func (elasticsearchObj *elasticsearch) Info() (interface{}, error) {
 
-	ok, err := checkClientInitialization()
-
-	if !ok {
-		return nil, err
-	}
-
-	res, err := client.Info()
+	res, err := elasticsearchObj.client.Info()
 	if err != nil {
 		log.Fatalf("Error getting client info %v", err)
 		return nil, err
 	}
 
 	return res, nil
-}
-
-func checkClientInitialization() (bool, error) {
-	if client == nil {
-		return false, errors.New("elasticsearch client not initialized yet")
-	}
-
-	return true, nil
 }

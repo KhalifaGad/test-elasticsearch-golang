@@ -22,8 +22,15 @@ func main() {
 
 	addresses := []string{elasticsearchURL}
 
-	if !elasticsearch.Init(addresses) {
+	es := elasticsearch.New(addresses)
+
+	info, err := es.Info()
+
+	if err != nil {
+		log.Fatal("elasticsearch not initialized, exiting the process...")
 		return
 	}
+
+	log.Println(info)
 
 }
