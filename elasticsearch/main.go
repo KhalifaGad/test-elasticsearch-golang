@@ -4,42 +4,49 @@ import (
 	"errors"
 	"log"
 
-	goelasticsearch "github.com/elastic/go-elasticsearch/v7"
+	es "github.com/elastic/go-elasticsearch/v7"
 )
 
-func GetClient(addresses []string) *goelasticsearch.Client {
-	cfg := goelasticsearch.Config{
+var client *es.Client
+
+func InitElasticsearch(addresses []string) bool {
+	cfg := es.Config{
 		Addresses: addresses,
 	}
 	log.Print("creating es client...")
-	client, err := goelasticsearch.NewClient(cfg)
+	esClient, err := es.NewClient(cfg)
+
+	client = esClient
 
 	if err != nil {
-		log.Fatalf("Err creating elasticsearch client: %v", err)
-		return nil
+		log.Fatalf("Error creating elasticsearch client: %v", err)
+		return false
 	}
 
-	return client
+	return true
 }
 
-type Elasticsearch struct {
-	client goelasticsearch.Client
-}
+func Info() (interface{}, error) {
 
-func (elasticsearch *Elasticsearch) Info() (interface{}, error) {
+	ok, err := checkClientInitialization()
 
-	if elasticsearch == nil {
-		log.Fatalf("Elasticsearch client not initialized yet!.")
-		return nil, errors.New("Elasticsearch client not initialized yet!")
+	if !ok {
+		return nil, err
 	}
 
-	res, err := elasticsearch.client.Info()
+	res, err := client.Info()
 	if err != nil {
 		log.Fatalf("Error getting client info %v", err)
 		return nil, err
 	}
 
-	defer res.Body.Close()
-
 	return res, nil
+}
+
+func checkClientInitialization() (bool, error) {
+	if client == nil {
+		return false, errors.New("elasticsearch client not initialized yet")
+	}
+
+	return true, nil
 }
