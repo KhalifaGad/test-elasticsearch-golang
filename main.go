@@ -2,29 +2,28 @@ package main
 
 import (
 	"log"
+	"os"
 
-	"github.com/elastic/go-elasticsearch/v7"
+	elasticsearch "github.com/KhalifaGad/test-elasticsearch-golang/elasticsearch"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 
-	cfg := elasticsearch.Config{
-		Addresses: []string{
-			"http://localhost:9200",
-		},
-	}
+	err := godotenv.Load(".env")
 
-	es, err := elasticsearch.NewClient(cfg)
 	if err != nil {
-		log.Fatalf("Error creating the client: %s", err)
+		log.Fatalf("Error loading env variables %v", err)
+		log.Fatal("process exiting...")
+		return
 	}
 
-	res, err := es.Info()
-	if err != nil {
-		log.Fatalf("Error getting response: %s", err)
+	elasticsearchURL := os.Getenv("ELASTICSEARCH_URL")
+
+	addresses := []string{elasticsearchURL}
+
+	if !elasticsearch.InitElasticsearch(addresses) {
+		return
 	}
 
-	defer res.Body.Close()
-
-	log.Println(res)
 }
