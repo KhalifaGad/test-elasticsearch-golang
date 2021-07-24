@@ -9,7 +9,7 @@ import (
 
 var client *es.Client
 
-func InitElasticsearch(addresses []string) bool {
+func Init(addresses []string) bool {
 	cfg := es.Config{
 		Addresses: addresses,
 	}

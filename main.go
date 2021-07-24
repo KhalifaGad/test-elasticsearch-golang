@@ -22,7 +22,7 @@ func main() {
 
 	addresses := []string{elasticsearchURL}
 
-	if !elasticsearch.InitElasticsearch(addresses) {
+	if !elasticsearch.Init(addresses) {
 		return
 	}
 
