@@ -5,6 +5,7 @@ import (
 	"os"
 
 	elasticsearch "github.com/KhalifaGad/test-elasticsearch-golang/elasticsearch"
+	server "github.com/KhalifaGad/test-elasticsearch-golang/http"
 	"github.com/joho/godotenv"
 )
 
@@ -32,4 +33,11 @@ func main() {
 	}
 
 	log.Println(info)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	server.Start(port)
 }
